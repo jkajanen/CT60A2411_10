@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadNextPage() {
+        prevWp.setPageUrl(wp.getPageUrl());
         myWeb.loadUrl(nextWp.getPageUrl());
     }
 
