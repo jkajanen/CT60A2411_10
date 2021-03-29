@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     WebView myWeb;
     EditText textViewAddressURL;
-    TextView checkThings; // For testing purposes, to see what's going on
+    TextView inputTextView; // For testing purposes, to see what's going on
 
     String addressString = "";
     WebPage wp = new WebPage();
@@ -39,16 +39,13 @@ public class MainActivity extends AppCompatActivity {
         context = MainActivity.this;
 
         System.out.println("######## Starting... ########");
-        checkThings = (TextView) findViewById(R.id.textViewAddress); // For testing purposes, to see what's going on
+        inputTextView = (TextView) findViewById(R.id.textViewAddress); // For testing purposes, to see what's going on
 
         textViewAddressURL = (EditText) findViewById(R.id.editTextTextMultiLine);
         myWeb = findViewById(R.id.webView);
         myWeb.setWebViewClient(new WebViewClient());
 
         myWeb.getSettings().setJavaScriptEnabled(true); // JavaScript usage E10.3
-        //myWeb.loadUrl("file:///android_asset/index.html"); // JavaScript usage E10.3
-
-        System.out.println("file:///android_asset/index.html");
 
         // Address field management
         textViewAddressURL.addTextChangedListener(new TextWatcher() {
@@ -73,36 +70,44 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Main page load
+
     public void loadPage(String url) {
         String preURL = "http://";
         String preSURL = "https://";
 
+        if (!wp.getPageUrl().equals(""))
+            prevWp.setPageUrl(wp.getPageUrl()); //Store previous page
+
         if (url.contains(preURL) || url.contains(preSURL)) {
-            myWeb.loadUrl(url);
             wp.setPageUrl(url);
+            myWeb.loadUrl(url);
         }
         else {
             String fullUrl = preURL + url;
             myWeb.loadUrl(fullUrl);
             wp.setPageUrl(fullUrl);
-            prevWp.setPageUrl(wp.getPageUrl());
         }
         textViewAddressURL.setText("");
+
+        /* Just for checking what's inside previous object
+        if (!prevWp.getPageUrl().equals(""))
+            inputTextView.setText(prevWp.getPageUrl());
+         */
     }
 
     // Refresh functionality E10.2
 
     public void refreshURL(View v){
         System.out.println("Refresh webpage pushed");
-        myWeb.loadUrl(wp.getPageUrl());
+        myWeb.loadUrl(wp.getPageUrl()); // Reload current
     }
 
 
     // JavaScript usage E10.3 - START
 
     public void initializeJS(View v) {
-        //myWeb.loadUrl(); OLD SCHOOL!
-        if (javaScriptStart == true ) {
+        if (javaScriptStart) {
             myWeb.loadUrl("file:///android_asset/index.html");
             javaScriptStart = false;
         }
@@ -112,23 +117,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void executeJS(View v) {
-        //myWeb.loadUrl(); OLD SCHOOL!
         myWeb.evaluateJavascript("javascript:shoutOut()",null);
         System.out.println("Run JS pushed");
     }
 
     // JavaScript usage E10.3 - END
 
-    // Previous and next page management E10.4
+    // Previous and next page management for one step forward or backwards - E10.4
 
-    public void loadPreviousPage() {
-        nextWp.setPageUrl(wp.getPageUrl());
-        myWeb.loadUrl(prevWp.getPageUrl());
+    public void loadPreviousPage(View v) {
+        nextWp.setPageUrl(wp.getPageUrl()); // Current saved to next
+        //inputTextView.setText(prevWp.getPageUrl());
+        if (!prevWp.getPageUrl().equals("")) {
+            wp.setPageUrl(prevWp.getPageUrl()); // Current updated
+            myWeb.loadUrl(prevWp.getPageUrl());
+        }
     }
 
-    public void loadNextPage() {
-        prevWp.setPageUrl(wp.getPageUrl());
-        myWeb.loadUrl(nextWp.getPageUrl());
+    public void loadNextPage(View v) {
+        prevWp.setPageUrl(wp.getPageUrl()); // Current saved to previous
+        //inputTextView.setText(nextWp.getPageUrl());
+        if (!nextWp.getPageUrl().equals("")) {
+            wp.setPageUrl(nextWp.getPageUrl()); // Current updated
+            myWeb.loadUrl(nextWp.getPageUrl());
+        }
     }
+
+    // Previous and next page management for one step forward or backwards E10.4 - END
 
 }
